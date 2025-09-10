@@ -4,6 +4,7 @@ import asyncio
 import logging
 from copy import deepcopy
 from datetime import datetime, timezone
+from pathlib import Path
 
 from DIRACCommon.Core.Utilities.ClassAd.ClassAdLight import ClassAd
 from DIRACCommon.Core.Utilities.ReturnValues import returnValueOrRaise
@@ -18,6 +19,7 @@ from DIRACCommon.WorkloadManagementSystem.Utilities.ParametricJob import (
 )
 from pydantic import BaseModel
 
+from diracx.api.jobs import create_sandbox
 from diracx.core.config import Config
 from diracx.core.models import (
     InsertedJob,
@@ -230,6 +232,12 @@ async def create_jdl_jobs(jobs: list[JobSubmissionSpec], job_db: JobDB, config: 
 
             # TODO is this even needed?
             class_ad_job.insertAttributeInt("JobID", job_id)
+
+            if class_ad_job.lookupAttribute("InputSandbox"):
+                # Update JDL initial ISB with ISB uploaded in the storage backend
+                input_sandbox = class_ad_job.getListFromExpression("InputSandbox")
+                res = await create_sandbox([Path(sb) for sb in input_sandbox])
+                class_ad_job.set_expression("InputSandbox", res)
 
             await check_and_prepare_job(
                 job_id,
