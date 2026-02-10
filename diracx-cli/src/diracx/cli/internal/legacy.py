@@ -6,7 +6,7 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Annotated, cast
 from urllib.parse import urljoin, urlparse
 
 import diraccfg
@@ -21,7 +21,7 @@ from typer import Option
 
 from diracx.core.config import Config
 from diracx.core.config.schema import Field, SupportInfo
-from diracx.core.extensions import select_from_extension
+from diracx.core.extensions import DiracEntryPoint, select_from_extension
 
 from ..utils import AsyncTyper
 
@@ -77,9 +77,9 @@ def cs_sync(old_file: Path, new_file: Path):
         )
 
     _apply_fixes(raw)
-    config_class: Config = select_from_extension(group="diracx", name="config")[
-        0
-    ].load()
+    config_class: Config = select_from_extension(
+        group=DiracEntryPoint.CORE, name="config"
+    )[0].load()
     config = config_class.model_validate(raw)
     new_file.write_text(
         yaml.safe_dump(config.model_dump(exclude_unset=True, mode="json"))
@@ -179,11 +179,11 @@ def _apply_fixes(raw):
 
 @app.command()
 def generate_helm_values(
-    public_cfg: Path = Option(help="Path to the cfg file served by the CS"),
-    secret_cfg: Path = Option(
-        default=None, help="Path to the cfg containing the secret"
-    ),
-    output_file: Path = Option(help="Where to dump the yam file"),
+    public_cfg: Annotated[Path, Option(help="Path to the cfg file served by the CS")],
+    output_file: Annotated[Path, Option(help="Where to dump the yam file")],
+    secret_cfg: Annotated[
+        Path | None, Option(help="Path to the cfg containing the secret")
+    ] = None,
 ):
     """Generate an initial values.yaml to run a DiracX installation.
 
@@ -264,7 +264,7 @@ def generate_helm_values(
 
     from diracx.core.extensions import select_from_extension
 
-    for entry_point in select_from_extension(group="diracx.dbs.sql"):
+    for entry_point in select_from_extension(group=DiracEntryPoint.SQL_DB):
         db_name = entry_point.name
         db_config = all_db_configs.get(db_name, {})
 
@@ -310,7 +310,7 @@ def generate_helm_values(
         },
     }
 
-    for entry_point in select_from_extension(group="diracx.dbs.os"):
+    for entry_point in select_from_extension(group=DiracEntryPoint.OS_DB):
         db_name = entry_point.name
         db_config = all_db_configs.get(db_name, {})
 

@@ -157,6 +157,7 @@ nav:
       - Manage extensions: developer/manage_extension.md
     - Explanations:
       - dev/explanations/index.md
+      - Documentation system: dev/explanations/documentation-system.md
       - Components:
         - dev/explanations/components/index.md
         - API: dev/explanations/components/api.md
@@ -168,6 +169,7 @@ nav:
       - Run demo: dev/explanations/run_demo.md
       - Extensions: dev/explanations/extensions.md
       - Designing functionality: dev/explanations/designing-functionality.md
+      - Dependency management: dev/explanations/dependency-management.md
     - Reference:
       - dev/reference/index.md
       - Dev env variables: dev/reference/env-variables.md

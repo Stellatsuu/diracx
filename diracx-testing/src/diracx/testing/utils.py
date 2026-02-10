@@ -23,7 +23,8 @@ import pytest
 from joserfc.jwk import KeySet, OKPKey
 from uuid_utils import uuid7
 
-from diracx.core.models import AccessTokenPayload, RefreshTokenPayload
+from diracx.core.extensions import DiracEntryPoint
+from diracx.core.models.auth import AccessTokenPayload, RefreshTokenPayload
 
 if TYPE_CHECKING:
     from diracx.core.settings import (
@@ -173,17 +174,17 @@ class ClientFactory:
                 return {"PolicySpecific": "OpenAccessForTest"}, {}
 
         enabled_systems = {
-            e.name for e in select_from_extension(group="diracx.services")
+            e.name for e in select_from_extension(group=DiracEntryPoint.SERVICES)
         }
         database_urls = {
             e.name: "sqlite+aiosqlite:///:memory:"
-            for e in select_from_extension(group="diracx.dbs.sql")
+            for e in select_from_extension(group=DiracEntryPoint.SQL_DB)
         }
         # TODO: Monkeypatch this in a less stupid way
         # TODO: Only use this if opensearch isn't available
         os_database_conn_kwargs = {
             e.name: {"sqlalchemy_dsn": "sqlite+aiosqlite:///:memory:"}
-            for e in select_from_extension(group="diracx.dbs.os")
+            for e in select_from_extension(group=DiracEntryPoint.OS_DB)
         }
         BaseOSDB.available_implementations = partial(
             fake_available_osdb_implementations,
@@ -198,7 +199,7 @@ class ClientFactory:
         all_access_policies = {
             e.name: [AlwaysAllowAccessPolicy]
             + BaseAccessPolicy.available_implementations(e.name)
-            for e in select_from_extension(group="diracx.access_policies")
+            for e in select_from_extension(group=DiracEntryPoint.ACCESS_POLICY)
         }
 
         config_source = ConfigSource.create_from_url(
@@ -390,10 +391,7 @@ def session_client_factory(
     tmp_path_factory,
     test_dev_settings,
 ):
-    """TODO.
-    ----
-
-    """
+    """TODO."""
     yield ClientFactory(
         tmp_path_factory,
         with_config_repo,
@@ -420,7 +418,9 @@ def with_config_repo(tmp_path_factory):
     from diracx.core.extensions import select_from_extension
 
     # Use extension-aware Config discovery to support extensions that add fields
-    config_class = select_from_extension(group="diracx", name="config")[0].load()
+    config_class = select_from_extension(group=DiracEntryPoint.CORE, name="config")[
+        0
+    ].load()
 
     tmp_path = tmp_path_factory.mktemp("cs-repo")
 

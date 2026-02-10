@@ -14,8 +14,9 @@ classifiers = [
 ]
 dependencies = [
     "pytest",
-    "pytest-asyncio==1.0.0",
+    "pytest-asyncio>=1.1.0",
     "pytest-cov",
+    "pytest-lazy-fixtures",
     "pytest-xdist",
     "httpx",
     "joserfc",
@@ -38,6 +39,9 @@ source = "vcs"
 
 [tool.hatch.version.raw-options]
 root = ".."
+
+[tool.hatch.build.targets.sdist.force-include]
+"../LICENSE" = "LICENSE"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/diracx"]
