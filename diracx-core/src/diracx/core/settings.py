@@ -203,7 +203,7 @@ class AuthSettings(ServiceSettingsBase):
     This includes both public and private keys for token signature
     generation and verification.
     """
-    
+
     # TODO: EdDSA should be removed later due to "SecurityWarning: EdDSA is deprecated via RFC 9864"
     token_allowed_algorithms: list[str] = ["RS256", "EdDSA", "Ed25519"]  # noqa: S105
     """List of allowed cryptographic algorithms for JWT token signing.
