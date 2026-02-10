@@ -160,7 +160,8 @@ class AuthSettings(ServiceSettingsBase):
 
     token_issuer: str
     token_keystore: TokenSigningKeyStore
-    token_allowed_algorithms: list[str] = ["RS256", "EdDSA"]  # noqa: S105
+    # TODO: EdDSA should be removed later due to "SecurityWarning: EdDSA is deprecated via RFC 9864"
+    token_allowed_algorithms: list[str] = ["RS256", "EdDSA", "Ed25519"]  # noqa: S105
     access_token_expire_minutes: int = 20
     refresh_token_expire_minutes: int = 60
 
